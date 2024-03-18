@@ -1,0 +1,6 @@
+{
+"targets"            : ["Pastry", "Z_Scratch", "K_Scatch", "Stains", "Dirtiness", "Bumps", "Other_Faults"],
+"path"               : "./data",
+"conjoin_orig_data"  : "N",
+"orig_path"          : "./data"
+}
