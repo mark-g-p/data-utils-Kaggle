@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 import os
-
+from gc import collect;
 
 # Function to load configuration from a JSON file
 def load_config(file_path : str):
@@ -43,3 +43,13 @@ class DataLoader():
         if self.conjoin_orig_data == "Y":
             print(f"\nOriginal set")
             print(self.original.head(n))
+
+    def dataDescription(self):
+        print(f"\n{'-'*20} Information and descriptive statistics {'-'*20}\n")
+        # Creating dataset information and description:
+        for lbl, df in {'Train': self.train, 'Test': self.test, 'Original': self.original}.items():
+            print(f"\n{lbl} description\n")
+            print(df.describe(percentiles= [0.05, 0.25, 0.50, 0.75, 0.9, 0.95, 0.99]))
+            print(f"\n{lbl} information\n")
+            print(df.info())
+        return self
