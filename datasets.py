@@ -1,7 +1,6 @@
 import pandas as pd
 import json
 import os
-from gc import collect;
 
 # Function to load configuration from a JSON file
 def load_config(file_path : str):
@@ -53,3 +52,20 @@ class DataLoader():
             print(f"\n{lbl} information\n")
             print(df.info())
         return self
+    
+    def _ConjoinTrainOrig(self):
+        if self.conjoin_orig_data == "Y":
+            print(f"\n\nTrain shape before conjoining with original = {self.train.shape}")
+            train = pd.concat([self.train, self.original], axis=0, ignore_index = True)
+            print(f"Train shape after conjoining with original= {train.shape}")
+
+            train = train.drop_duplicates(ignore_index=True)
+            print(f"Train shape after de-duping = {train.shape}")
+
+            train.index = range(len(train))
+            train.index.name = 'id'
+
+        else:
+            print(f"\nWe are using the competition training data only")
+            train = self.train
+        return train
