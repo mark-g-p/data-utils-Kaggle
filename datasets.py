@@ -21,9 +21,10 @@ class DataLoader():
             self.original      = self.train
         
         self.sub_fl   = pd.read_csv(os.path.join(config["path"], "sample_submission.csv"))
-        # Remove non-standard symbols from column names
+        # Standarize column names
         for tbl in [self.train, self.original, self.test]:
             tbl.columns = tbl.columns.str.replace(r"\(|\)|\s+","", regex = True)
+            tbl.columns = map(str.lower, tbl.columns)
     
     def _addSourceCol(self):
 # Add column with source of data. Set list of feature columns names
@@ -69,3 +70,20 @@ class DataLoader():
             print(f"\nWe are using the competition training data only")
             train = self.train
         return train
+    
+    def _missingData(self):
+        # Display 
+        for (df, name) in zip([self.train,self.test,self.original], ["Train", "Test", "Original"]):
+            print(f"\n{'-'*20}Missing data {name}{'-'*20}\n")
+            null_counts = df.isnull().sum()
+            null_counts = null_counts[null_counts > 0]
+            if null_counts.size > 0:
+                print(null_counts)
+            else:
+                print(f"No null values found in {name} dataset.")
+            
+    def _uniqData(self):
+        self._addSourceCol()
+        for (df, name) in zip([self.train,self.test,self.original], ["Train", "Test", "Original"]):
+            print(f"\n{'-'*20}Unique value count {name} {'-'*20}\n")
+            print(df[self.feat_list].nunique())
