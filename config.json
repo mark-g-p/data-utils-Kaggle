@@ -2,5 +2,6 @@
 "targets"            : ["Pastry", "Z_Scratch", "K_Scatch", "Stains", "Dirtiness", "Bumps", "Other_Faults"],
 "path"               : "./data",
 "conjoin_orig_data"  : "Y",
-"orig_path"          : "./data/orig.csv"
+"orig_path"          : "./data/orig.csv",
+"delete_missing"     : "Y"
 }

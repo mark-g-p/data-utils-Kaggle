@@ -25,6 +25,8 @@ class DataLoader():
         for tbl in [self.train, self.original, self.test]:
             tbl.columns = tbl.columns.str.replace(r"\(|\)|\s+","", regex = True)
             tbl.columns = map(str.lower, tbl.columns)
+
+        self.delete_missing = config["delete_missing"]
     
     def _addSourceCol(self):
 # Add column with source of data. Set list of feature columns names
@@ -78,12 +80,24 @@ class DataLoader():
             null_counts = df.isnull().sum()
             null_counts = null_counts[null_counts > 0]
             if null_counts.size > 0:
-                print(null_counts)
+                # print(null_counts)
+                print(f"Incomplete rows: {null_counts.size}")
+                print(f"Percentage of all rows: {(null_counts.size/df.shape[0]*100):.3f}%")
+                if self.delete_missing == "Y":
+                    print(f"\n{'-'*10}Dropping incomple rows from {name}{'-'*10}\n")
+                    print(f"Dataframe size before removal {df.shape}")
+                    df = df.dropna()
+                    print(f"Dataframe size after removal {df.shape}")
             else:
                 print(f"No null values found in {name} dataset.")
+                
+
             
     def _uniqData(self):
         self._addSourceCol()
         for (df, name) in zip([self.train,self.test,self.original], ["Train", "Test", "Original"]):
             print(f"\n{'-'*20}Unique value count {name} {'-'*20}\n")
             print(df[self.feat_list].nunique())
+
+    # def _deleteMissing(self):
+        
