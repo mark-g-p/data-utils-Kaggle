@@ -1,12 +1,5 @@
 import pandas as pd
-import json
 import os
-
-# Function to load configuration from a JSON file
-def load_config(file_path : str):
-    with open(file_path, 'r') as config_file:
-        config = json.load(config_file)
-    return config
 
 class DataLoader():
     def __init__(self, config):
