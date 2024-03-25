@@ -3,5 +3,6 @@
 "path"               : "./data",
 "conjoin_orig_data"  : "Y",
 "orig_path"          : "./data/orig.csv",
-"delete_missing"     : "Y"
+"delete_missing"     : "Y",
+"colors"             : ["blue", "orange", "green"]  
 }
