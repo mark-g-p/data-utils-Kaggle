@@ -1,8 +1,10 @@
 import pandas as pd
 import os
+import numpy as np
+from sklearn.ensemble import IsolationForest
 
 class DataLoader():
-    def __init__(self, config):
+    def __init__(self, config) -> None:
         self.train             = pd.read_csv(os.path.join(config["path"],"train.csv"), index_col = 'id')
         self.test              = pd.read_csv(os.path.join(config["path"],"test.csv"), index_col = 'id')
         self.targets           = config["targets"]
@@ -21,16 +23,15 @@ class DataLoader():
 
         self.delete_missing = config["delete_missing"]
     
-    def _addSourceCol(self):
+    def _addSourceCol(self) -> None:
 # Add column with source of data. Set list of feature columns names
         self.train['Source']    = "Competition"
         self.test['Source']     = "Competition"
         self.original['Source'] = "Original"
 
         self.feat_list = self.test.columns
-        return self
     
-    def _displayDataHead(self, n=5):
+    def _displayDataHead(self, n=5) -> None:
         print(f"\nTrain set")
         print(self.train.head(n))
         print(f"\nTest set")
@@ -39,7 +40,7 @@ class DataLoader():
             print(f"\nOriginal set")
             print(self.original.head(n))
 
-    def dataDescription(self):
+    def dataDescription(self) -> None:
         print(f"\n{'-'*20} Information and descriptive statistics {'-'*20}\n")
         # Creating dataset information and description:
         for lbl, df in {'Train': self.train, 'Test': self.test, 'Original': self.original}.items():
@@ -47,9 +48,8 @@ class DataLoader():
             print(df.describe(percentiles= [0.05, 0.25, 0.50, 0.75, 0.9, 0.95, 0.99]))
             print(f"\n{lbl} information\n")
             print(df.info())
-        return self
     
-    def _ConjoinTrainOrig(self):
+    def _conjoinTrainOrig(self) -> None:
         if self.conjoin_orig_data == "Y":
             print(f"\n\nTrain shape before conjoining with original = {self.train.shape}")
             train = pd.concat([self.train, self.original], axis=0, ignore_index = True)
@@ -64,9 +64,8 @@ class DataLoader():
         else:
             print(f"\nWe are using the competition training data only")
             train = self.train
-        return train
     
-    def _missingData(self):
+    def _missingData(self) -> None:
         # Display 
         for (df, name) in zip([self.train,self.test,self.original], ["Train", "Test", "Original"]):
             print(f"\n{'-'*20}Missing data {name}{'-'*20}\n")
@@ -86,11 +85,31 @@ class DataLoader():
                 
 
             
-    def _uniqData(self):
+    def _uniqData(self) -> None:
         self._addSourceCol()
         for (df, name) in zip([self.train,self.test,self.original], ["Train", "Test", "Original"]):
             print(f"\n{'-'*20}Unique value count {name} {'-'*20}\n")
             print(df[self.feat_list].nunique())
 
-    # def _deleteMissing(self):
         
+    def _deleteMissing(self) -> None:
+        # Never remove null values from test. It's expected to give results even with missing data.
+        self.train = self.train.dropna()
+        self.original = self.original.dropna()
+        
+    def _removeOutliers(self) -> None:
+        # Never remove outliers from test. You are expected to use whole dataset.
+        # Expects that there are no missing values in the datasets.
+        try:
+        # Fit the model
+            clf = IsolationForest(contamination=0.01)
+            clf.fit(self.train)
+
+            # Predict the anomalies in the data
+            pred = clf.predict(self.train)
+            anomalies = self.train[pred == -1]
+            self.train = self.train[pred != -1]
+            print(f"{anomalies.shape[0]} outliers detected and removed.")
+        except ValueError:
+            print("Missing values found. Before removing outliers make sure there are no NaNs or Nulls in the dataset.")
+
