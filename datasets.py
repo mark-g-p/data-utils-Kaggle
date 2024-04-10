@@ -60,7 +60,7 @@ class DataLoader:
             print(df.info())
 
     def _conjoin_train_orig(self) -> None:
-        # Join two datasets and removes duplicates
+        # Join two training dataset with original dataset and removes duplicates
         if self.conjoin_orig_data == "Y":
             print(
                 f"\n\nTrain shape before conjoining with original = {self.train.shape}"
@@ -87,7 +87,6 @@ class DataLoader:
             null_counts = df.isnull().sum()
             null_counts = null_counts[null_counts > 0]
             if null_counts.size > 0:
-                # print(null_counts)
                 print(f"Incomplete rows: {null_counts.size}")
                 print(
                     f"Percentage of all rows: {(null_counts.size/df.shape[0]*100):.3f}%"
@@ -131,11 +130,21 @@ class DataLoader:
                 "Missing values found. Before removing outliers make sure there are no NaNs or Nulls in the dataset."
             )
 
-    def plot_distribution(self, df1: pd.DataFrame, df2: pd.DataFrame) -> None:
+    def plot_distributions(
+        self,
+        df1: pd.DataFrame,
+        df2: pd.DataFrame,
+        name1: str = "DataFrame 1",
+        name2: str = "DataFrame 2",
+    ) -> None:
+        """Plot histograms for common features between two dataframes.
+        Doesn't keep original order of features."""
         numerical_columns1 = df1.select_dtypes(include=np.number).columns
         numerical_columns2 = df2.select_dtypes(include=np.number).columns
-        numerical_columns = list(set(numerical_columns1) & set(numerical_columns2))
-        fig, axs = plt.subplots(
+        numerical_columns = sorted(
+            list(set(numerical_columns1) & set(numerical_columns2))
+        )
+        _, axs = plt.subplots(
             len(numerical_columns), figsize=(10, 5 * len(numerical_columns))
         )
 
@@ -145,16 +154,16 @@ class DataLoader:
                 color="skyblue",
                 edgecolor="black",
                 alpha=0.5,
-                label="DataFrame 1",
+                label=f"{name1}",
             )
             axs[i].hist(
                 df2[col],
                 color="red",
                 edgecolor="black",
                 alpha=0.5,
-                label="DataFrame 2",
+                label=f"{name2}",
             )
-            axs[i].set_title(f"Distribution of {col}")
+            axs[i].set_title(f"Distributions of {col}")
             axs[i].legend()
 
         plt.tight_layout()
