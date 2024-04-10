@@ -17,7 +17,7 @@ class Visualiser:
         dl.train.describe()
         self.colors = config["colors"]
 
-    def featDistribution(self) -> None:
+    def feat_distribution(self) -> None:
         num_plots = len(self.cont_cols)
         num_cols = 3
         num_rows = -(-num_plots // num_cols)
@@ -68,7 +68,7 @@ class Visualiser:
         plt.tight_layout()
         plt.show()
 
-    def featuresViolinPlot(self) -> None:
+    def features_violin_plot(self) -> None:
         num_plots = len(self.cont_cols)
         num_cols = 2
         num_rows = -(-num_plots // num_cols)
@@ -123,7 +123,7 @@ class StatisticalTests:
         self.dl = dl
         self.cont_cols = self.dl.test.columns
 
-    def testNormality(self) -> None:
+    def test_normality(self) -> None:
         for df, name in zip(
             [self.dl.train, self.dl.test, self.dl.original],
             ["Train", "Test", "Original"],

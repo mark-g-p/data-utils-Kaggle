@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.ensemble import IsolationForest
 
 
@@ -28,7 +29,7 @@ class DataLoader:
 
         self.delete_missing = config["delete_missing"]
 
-    def _addSourceCol(self) -> None:
+    def _add_source_col(self) -> None:
         # Add column with source of data. Set list of feature columns names
         self.train["Source"] = "Competition"
         self.test["Source"] = "Competition"
@@ -36,7 +37,7 @@ class DataLoader:
 
         self.feat_list = self.test.columns
 
-    def _displayDataHead(self, n=5) -> None:
+    def _display_data_head(self, n=5) -> None:
         print(f"\nTrain set")
         print(self.train.head(n))
         print(f"\nTest set")
@@ -45,7 +46,7 @@ class DataLoader:
             print(f"\nOriginal set")
             print(self.original.head(n))
 
-    def dataDescription(self) -> None:
+    def data_description(self) -> None:
         print(f"\n{'-'*20} Information and descriptive statistics {'-'*20}\n")
         # Creating dataset information and description:
         for lbl, df in {
@@ -58,7 +59,7 @@ class DataLoader:
             print(f"\n{lbl} information\n")
             print(df.info())
 
-    def _conjoinTrainOrig(self) -> None:
+    def _conjoin_train_orig(self) -> None:
         # Join two datasets and removes duplicates
         if self.conjoin_orig_data == "Y":
             print(
@@ -77,7 +78,7 @@ class DataLoader:
         train = train.drop_duplicates(ignore_index=True)
         print(f"Train shape after de-duping = {train.shape}")
 
-    def _missingData(self) -> None:
+    def _missing_data(self) -> None:
         # Display
         for df, name in zip(
             [self.train, self.test, self.original], ["Train", "Test", "Original"]
@@ -99,20 +100,20 @@ class DataLoader:
             else:
                 print(f"No null values found in {name} dataset.")
 
-    def _uniqData(self) -> None:
-        self._addSourceCol()
+    def _uniq_data(self) -> None:
+        self._add_source_col()
         for df, name in zip(
             [self.train, self.test, self.original], ["Train", "Test", "Original"]
         ):
             print(f"\n{'-'*20}Unique value count {name} {'-'*20}\n")
             print(df[self.feat_list].nunique())
 
-    def _deleteMissing(self) -> None:
+    def _delete_missing(self) -> None:
         # Never remove null values from test. It's expected to give results even with missing data.
         self.train = self.train.dropna()
         self.original = self.original.dropna()
 
-    def _removeOutliers(self) -> None:
+    def _remove_outliers(self) -> None:
         # Never remove outliers from test. You are expected to use whole dataset.
         # Expects that there are no missing values in the datasets.
         try:
@@ -129,3 +130,33 @@ class DataLoader:
             print(
                 "Missing values found. Before removing outliers make sure there are no NaNs or Nulls in the dataset."
             )
+
+    def plot_distribution(df1: pd.DataFrame, df2: pd.DataFrame) -> None:
+        numerical_columns = df1.select_dtypes(include=np.number).columns
+
+        fig, axs = plt.subplots(
+            len(numerical_columns), figsize=(10, 5 * len(numerical_columns))
+        )
+
+        for i, col in enumerate(numerical_columns):
+            axs[i].hist(
+                df1[col],
+                bins=30,
+                color="skyblue",
+                edgecolor="black",
+                alpha=0.5,
+                label="DataFrame 1",
+            )
+            axs[i].hist(
+                df2[col],
+                bins=30,
+                color="red",
+                edgecolor="black",
+                alpha=0.5,
+                label="DataFrame 2",
+            )
+            axs[i].set_title(f"Distribution of {col}")
+            axs[i].legend()
+
+        plt.tight_layout()
+        plt.show()
