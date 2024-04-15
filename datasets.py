@@ -143,7 +143,9 @@ class DataLoader:
         name2: str = "DataFrame 2",
     ) -> None:
         """Plot histograms for common features between two dataframes.
-        Doesn't keep original order of features."""
+        Doesn't keep original order of features.
+        Histograms are scaled to sum up to 1 (i.e., to represent a probability distribution)
+        to make visual comparison of two distributions easier."""
         numerical_columns1 = df1.select_dtypes(include=np.number).columns
         numerical_columns2 = df2.select_dtypes(include=np.number).columns
         numerical_columns = sorted(
@@ -153,13 +155,18 @@ class DataLoader:
             len(numerical_columns), figsize=(10, 5 * len(numerical_columns))
         )
 
+        weights1 = np.ones(df1.shape[0]) / df1.shape[0]
+        weights2 = np.ones(df2.shape[0]) / df2.shape[0]
+
         for i, col in enumerate(numerical_columns):
+
             axs[i].hist(
                 df1[col],
                 color="skyblue",
                 edgecolor="black",
                 alpha=0.5,
                 label=f"{name1}",
+                weights=weights1,
             )
             axs[i].hist(
                 df2[col],
@@ -167,6 +174,7 @@ class DataLoader:
                 edgecolor="black",
                 alpha=0.5,
                 label=f"{name2}",
+                weights=weights2,
             )
             axs[i].set_title(f"Distributions of {col}")
             axs[i].legend()
