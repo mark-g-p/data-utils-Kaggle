@@ -115,16 +115,21 @@ class DataLoader:
     def _remove_outliers(self) -> None:
         # Never remove outliers from test. You are expected to use whole dataset.
         # Expects that there are no missing values in the datasets.
+        # Checks only numeric data. If you want to use it for categorical, encode them first.
+
+        num_cols = self.train.select_dtypes(include=np.number).columns
         try:
             # Fit the model
+            train_num = self.train[num_cols]
             clf = IsolationForest(contamination=0.01)
-            clf.fit(self.train)
+            clf.fit(train_num)
 
             # Predict the anomalies in the data
-            pred = clf.predict(self.train)
-            anomalies = self.train[pred == -1]
-            self.train = self.train[pred != -1]
+            pred = clf.predict(train_num)
+            anomalies = train_num[pred == -1]
+            self.train = train_num[pred != -1].dropna()
             print(f"{anomalies.shape[0]} outliers detected and removed.")
+
         except ValueError:
             print(
                 "Missing values found. Before removing outliers make sure there are no NaNs or Nulls in the dataset."
