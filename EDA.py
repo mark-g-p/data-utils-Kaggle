@@ -4,7 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 import shap
-from scipy.stats import shapiro, normaltest
+from scipy.stats import shapiro, normaltest, ks_2samp
 from sklearn.metrics import roc_curve, auc
 from sklearn.model_selection import train_test_split
 from catboost import Pool, CatBoostClassifier
@@ -155,6 +155,38 @@ class StatisticalTests:
                 print(normal_columns)
             else:
                 print("No features passed the Normality test")
+
+
+def ks_for_two_dfs(df1: pd.DataFrame, df2: pd.DataFrame) -> None:
+    """
+    Compare the distributions of all columns in two dataframes using the Kolmogorov-Smirnov test.
+    Doesn't keep original order of features.
+    Parameters:
+    df1 (pd.DataFrame): First dataframe.
+    df2 (pd.DataFrame): Second dataframe.
+    Returns:
+    results (dict): A dictionary where keys are column names and values are tuples of (KS statistic, p-value).
+    """
+    numerical_columns1 = df1.select_dtypes(include=np.number).columns
+    numerical_columns2 = df2.select_dtypes(include=np.number).columns
+    numerical_columns = sorted(list(set(numerical_columns1) & set(numerical_columns2)))
+    results = {}
+    for col in numerical_columns:
+        # Extract the data from the dataframes
+        data1 = df1[col]
+        data2 = df2[col]
+        # Perform the Kolmogorov-Smirnov test
+        ks_statistic, p_value = ks_2samp(data1, data2)
+        print(f"\nColumn: {col}")
+        print(f"KS Statistics={ks_statistic}, p={p_value}")
+        if p_value > 0.05:
+            print(
+                f"The distribution of the {col} appears to be the same (we fail to reject H0)"
+            )
+        else:
+            print(
+                f"The distribution of the {col} appears to be different (we reject the null hypothesis, H0)"
+            )
 
 
 # fillna
